@@ -1,12 +1,19 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-
-const app = express();
-app.use(bodyParser.json());
+const exphbs = require('express-handlebars');
 const path = require('path');
 const db = require('./db.js');
-
+//mongodb collection name
 const collection = "customers";
+
+const app = express();
+
+//handlebars middleware
+app.engine('handlebars', exphbs());
+app.set('view engine', 'handlebars');
+
+app.use(bodyParser.json());
+
 
 app.get('/hola', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
@@ -18,7 +25,11 @@ app.get('/', (req, res) => {
       console.log(err);
     }else{
       //console.log(documents);
-      res.json(documents);
+      //res.json(documents);
+      res.render('home', {
+        title: 'customers app',
+        documents
+      });
     }
   });
 });
