@@ -1,0 +1,91 @@
+<style>
+body{
+  margin: 0; /* removing the default body margin */
+}
+
+table, th, td {
+  border: 1px solid black;
+}
+h4{
+  margin-top: 0px;
+}
+.title{
+  text-align: right;
+  margin-right: 600px;
+}
+.customer_table{
+  width: 100%
+}
+.table {
+  display:inline-block;
+  width:65%;
+
+}
+.column{
+  float: left;
+  width: 30%;
+  padding: 0px;
+  margin-top: 50px;
+  margin-left: 20px;
+}
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+</style>
+
+
+
+<h1 class="title">{{title}}</h1>
+
+<div class="row">
+
+
+<div class = "column">
+<form action="/create" method="POST">
+name: <input type="text" name="name" value=""><br>
+address: <input type="text" name="address" value=""><br>
+<input type="submit" value="Submit">
+</form>
+
+<br>
+<br>
+
+<form action="/delete" method="POST">
+number to delete: <input type="text" name="number" value=""><br>
+<input type="submit" value="Submit">
+</form>
+
+<br>
+<br>
+
+<form action="/update" method="POST">
+number to change:<input type="text" name="number_to_change" value=""><br>
+name: <input type="text" name="newname" value=""><br>
+address: <input type="text" name="newaddress" value=""><br>
+<input type="submit" value="Submit">
+</form>
+
+
+<br>
+<br>
+
+<form action="/">
+    <input type="submit" value="Go back" />
+</form>
+</div>
+
+<div class="table">
+
+<table class = "customer_table">
+    <tr> <th>number</th> <th>id</th> <th>name</th> <th>address</th></tr>
+    {{#each documents}}
+    <tr>
+      <td>{{math @index "+" 1}} </td> <td>{{this._id}}</td> <td>{{this.name}}</td> <td>{{this.address}}</td>
+    </tr>
+
+    {{/each}}
+</table>
+</div>
+</div>

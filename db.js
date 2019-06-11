@@ -10,14 +10,21 @@ const state = {
   db : null
 };
 
+console.log("8. afuera de connect");
 const connect = (cb) =>{
+  console.log("1. connect");
   if(state.db){
+    console.log("2. if (state)");
     cb();
   }else{
+    console.log("3. else");
     MongoClient.connect(url, mongoOptions,(err, client) => {
+      console.log("4. mongoclient");
       if(err){
+        console.log("5. mongoclient if(err)");
         cb();
       }else{
+        console.log("6. mongoclient else");
         state.db = client.db(dbname);
         cb();
       }
