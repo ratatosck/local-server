@@ -1,0 +1,352 @@
+<script type="text/javascript" src="./node_modules/chart.js/dist/Chart.bundle.min.js"></script>
+<link href="./node_modules/tabulator-tables/dist/css/tabulator_modern.min.css" rel="stylesheet">
+<script type="text/javascript" src="./node_modules/tabulator-tables/dist/js/tabulator.min.js"></script>
+<script type="text/javascript" src="./node_modules/jquery/dist/jquery.min.js"></script>
+
+<style>
+body{
+  background-color: #31d2ff;
+}
+canvas {
+  background-color: white;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+.go-back input[type="submit"]{
+  font-size: 15pt;
+  width: 8%;
+  height: 35px;
+  background-color: #3798ff;
+  color: white;
+  border: 2px solid black;
+  margin-bottom: 20px;
+}
+
+.go-back input[type="submit"]:hover{
+  border: 2px solid red;
+}
+
+.table{
+    margin-top: 10px;
+    width: 40%;
+    margin-left: 25%;
+  }
+
+.table-controls{
+    margin-top: 100px;
+    margin-left: 25%;
+    width: 50%;
+  }
+
+  .stats{
+    margin-top: 10px;
+    width: 60%;
+    height: 50%;
+    margin-left: 15%;
+  }
+  .allStats{
+    margin-top: 10px;
+    width: 60%;
+    height: 50%;
+    margin-left: 15%;
+  }
+}
+
+
+
+</style>
+
+<div class="go-back">
+<form action="/">
+    <input type="submit" value="Home" />
+</form>
+</div>
+<p>
+    <div class="table-controls">
+        <span>
+          <label>campo: </label>
+          <select id="filter-field">
+              <option></option>
+              <option value="_id">codigo</option>
+              <option value="name">nombre</option>
+              <option value="description">descripcion</option>
+              <option value="price">precio</option>
+              <option value="quantity">cantidad</option>
+              <!-- ejemplo de filtro customizable. <option value="function">Drives &amp;Rating &lt; 3</option> -->
+          </select>
+        </span>
+
+        <span>
+          <label>tipo: </label>
+          <select id="filter-type">
+              <option value="=">=</option>
+              <option value="<">&lt;</option>
+              <option value="<=">&lt;=</option>
+              <option value=">">&gt;</option>
+              <option value=">=">&gt;=</option>
+              <option value="!=">!=</option>
+              <option value="como">like</option>
+          </select>
+        </span>
+
+          <span><label>valor: </label> <input id="filter-value" type="text" placeholder="value to filter"></span>
+
+          <button id="filter-clear">limpiar</button>
+    </div>
+
+</p>
+<div id="product-table" class="table"></div>
+
+<br>
+<br>
+<div class="stats">
+  <canvas id="myChart" width="800" height="200"></canvas>
+</div>
+
+<div class="allStats">
+  <canvas id="myChart2" width="200" height="200"></canvas>
+</div>
+
+<br>
+<br>
+
+<script>
+var ctx = document.getElementById('myChart').getContext('2d');
+var ctx2 = document.getElementById('myChart2').getContext('2d');
+
+create_Chart2();
+
+function updateFilter(){
+
+    var filter = $("#filter-field").val() == "function" ? customFilter : $("#filter-field").val();
+
+    if($("#filter-field").val() == "function" ){
+        $("#filter-type").prop("disabled", true);
+        $("#filter-value").prop("disabled", true);
+    }else{
+        $("#filter-type").prop("disabled", false);
+        $("#filter-value").prop("disabled", false);
+    }
+
+    table.setFilter(filter, $("#filter-type").val(), $("#filter-value").val());
+}
+
+//Update filters on value change
+$("#filter-field, #filter-type").change(updateFilter);
+$("#filter-value").keyup(updateFilter);
+
+//Clear filters on "Clear Filters" button click
+$("#filter-clear").click(function(){
+    $("#filter-field").val("");
+    $("#filter-type").val("=");
+    $("#filter-value").val("");
+
+    table.clearFilter();
+});
+
+let arr = [0,0,0,0,0,0,0,0,0,0,0,0];
+
+const table = new Tabulator("#product-table", {
+  height:"100%",
+  layout:"fitColumns",
+  ajaxURL:"./productAPI",
+  addRowPos:"top",
+  columns:[
+  {title:"codigo", field:"_id", align:"center"},
+  {title:"nombre", field:"name", align:"center", editor:false},
+  {title:"descripcion", field:"description", align:"center", editor:false},
+  {formatter:"buttonCross", width:50, align:"center", cellClick:function(e, cell){
+    const id = {id: cell.getRow().getData()._id};
+    console.log(id);
+    $.ajax({
+      url: "/estadisticasAPI",
+      data: id,
+      type: "post",
+      success: function(response, textStatus, xhr){
+        console.log(response);
+        const data = response;
+        // arr = [0,0,0,0,0,0,0,0,0,0,0,0];
+        arr = count(data);
+        create_Chart(arr);
+      },
+      error: function(XMLHttpRequest, textStatus, error){
+        alert("AJAX error: " + textStatus + "; " + error);
+      }
+    })
+    console.log(arr);
+
+    }
+  }
+  ],
+
+});
+
+function create_Chart(arr){
+  console.log("aqui ta");
+  console.log(arr);
+var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+        datasets: [{
+            label: 'Ventas de producto por mes',
+            data: arr,
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)',
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+    }
+});
+}
+
+async function create_Chart2(){
+  let arr = [0,0,0,0,0,0,0,0,0,0,0,0];
+  const data = await getData();
+  arr =  count(data);
+  console.log("aqui ta");
+
+var myChart2 = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+        labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+        datasets: [{
+            label: 'Ventas de todos los productos por mes',
+            data: arr,
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)',
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+    }
+});
+}
+
+async function getData(){
+ const res = await fetch("./estadisticasAPI2");
+ const data = await res.json();
+ return data;
+}
+
+function count(data){
+  let arr = [0,0,0,0,0,0,0,0,0,0,0,0];
+  console.log(data);
+  data.forEach((item) => {
+    switch(item.month) {
+        case 0:
+          arr[0]++;
+          break;
+        case 1:
+          arr[1]++;
+          break;
+        case 2:
+          arr[2]++;
+          break;
+        case 3:
+          arr[3]++;
+          break;
+        case 4:
+          arr[4]++;
+          break;
+        case 5:
+          arr[5]++;
+          break;
+        case 6:
+          arr[6]++;
+          break;
+        case 7:
+          arr[7]++;
+          break;
+        case 8:
+          arr[8]++;
+          break;
+        case 9:
+          arr[9]++;
+          break;
+        case 10:
+          arr[10]++;
+          break;
+        case 11:
+          arr[11]++;
+          break;
+
+      }
+  });
+  console.log("arr inside count");
+  console.log(arr);
+  return arr
+}
+</script>

@@ -1,0 +1,121 @@
+<link href="./node_modules/tabulator-tables/dist/css/tabulator_modern.min.css" rel="stylesheet">
+<script type="text/javascript" src="./node_modules/tabulator-tables/dist/js/tabulator.min.js"></script>
+<script type="text/javascript" src="./node_modules/jquery/dist/jquery.min.js"></script>
+<style>
+  body{
+    background-color: #31d2ff;
+  }
+  .tabulator{
+    margin-top: 10px;
+    width: 70%;
+    margin-left: 15%;
+  }
+  .table-controls{
+    margin-top: 100px;
+    margin-left: 20%;
+    width: 20%;
+  }
+  #add-row{
+    font-size: 15pt;
+    width: 50%;
+    height: 50px;
+    background-color: #3798ff;
+    color: white;
+    border: 2px solid black;
+    margin-bottom: 10px;
+  }
+
+  #add-row:hover{
+    border: 2px solid red;
+  }
+  .go-back input[type="submit"]{
+    font-size: 15pt;
+    width: 8%;
+    height: 35px;
+    background-color: #3798ff;
+    color: white;
+    border: 2px solid black;
+    margin-bottom: 50px;
+  }
+
+  .go-back input[type="submit"]:hover{
+    border: 2px solid red;
+  }
+
+  }
+</style>
+
+<div class="go-back">
+<form action="/">
+    <input type="submit" value="Home" />
+</form>
+</div>
+
+<div class="table-controls">
+      <button id="add-row">Añadir producto</button>
+</div>
+<div id="example-table" class="tabulator table1"></div>
+
+<script>
+const table = new Tabulator("#example-table", {
+  height:"500px",
+  layout:"fitColumns",
+  ajaxURL:"./productAPI",
+  addRowPos:"top",
+  columns:[
+  {title:"codigo", field:"_id", align:"center"},
+  {title:"nombre", field:"name", align:"center", editor:true},
+  {title:"descripcion", field:"description", align:"center", editor:true},
+  {title:"precio", field:"price", align:"center", editor:true},
+  {title:"cantidad", field:"quantity", align:"center", editor:true},
+  {formatter:"buttonCross", width:50, align:"center", cellClick:function(e, cell){
+    $.ajax({
+      url: "/delete",
+      data: cell.getRow().getData(),
+      type: "post",
+      success: function(response, textStatus, xhr){
+        //getData();
+      },
+      error: function(XMLHttpRequest, textStatus, error){
+        console.log("delete AJAX error: " + textStatus + "; " + error);
+      }
+    })
+    cell.getRow().delete();
+  }},
+  ],
+
+  rowClick: function(e, row) { // Trigger an alert message when the row is clicked.
+         console.log("Row " + row.getData().id + " Clicked!");
+       },
+ cellEdited:function(cell){
+   // This callback is called any time a cell is edited.
+   $.ajax({
+     url: "/update",
+     data: cell.getRow().getData(),
+     type: "post",
+     success: function(response, textStatus, xhr){
+       //getData();
+     },
+     error: function(XMLHttpRequest, textStatus, error){
+       console.log("update AJAX error: " + textStatus + "; " + error);
+     }
+   })
+ },
+});
+  //Add row on "Add Row" button click
+$("#add-row").click(function(){
+  $.ajax({
+    url: "/create",
+    type: "post",
+    success: function(response, textStatus, xhr){
+      console.log(response);
+      table.addData({_id: response, name:"", description:"", price:"", quantity:""}, true);
+    },
+    error: function(XMLHttpRequest, textStatus, error){
+      console.log("create AJAX error: " + textStatus + "; " + error);
+    }
+  })
+});
+
+
+</script>

@@ -1,0 +1,113 @@
+<script type="text/javascript" src="./node_modules/jquery/dist/jquery.min.js"></script>
+
+<style media="screen">
+body{
+  background-color: #31d2ff;
+}
+label{
+  font-size: 25pt;
+}
+
+.go-back input[type="submit"]{
+  font-size: 15pt;
+  width: 8%;
+  height: 35px;
+  background-color: #3798ff;
+  color: white;
+  border: 2px solid black;
+  margin-bottom: 20px;
+}
+.go-back input[type="submit"]:hover{
+  border: 2px solid red;
+}
+
+input[type=text], input[type=password] {
+  width: 30%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.login{
+text-align: center;
+}
+#jwt{
+  font-size: 15pt;
+  width: 8%;
+  height: 35px;
+  background-color: #3798ff;
+  color: white;
+  border: 2px solid black;
+  margin-bottom: 20px;
+}
+#jwt:hover{
+    border: 2px solid red;
+}
+
+</style>
+
+
+<div class="go-back">
+<form action="/">
+    <input type="submit" value="Home" />
+</form>
+</div>
+
+
+<div class="login">
+  <label for="uname"><b>Usuario</b></label><br>
+  <input type="text" placeholder="introduzca usuario" id="uname" required><br>
+
+  <label for="psw"><b>Contraseña</b></label><br>
+  <input type="password" placeholder="introduzca contraseña" id="psw" required><br>
+    <button id="jwt">login</button><br>
+</div>
+
+<script type='text/javascript'>
+// define vars
+
+
+
+
+
+// ajax call
+// $("#jwt").click(function(){
+// $.ajax({
+//     url: "./login",
+//     dataType : 'jsonp',
+//     beforeSend : function(xhr) {
+//       // set header if JWT is set
+//       if ($window.sessionStorage.token) {
+//           xhr.setRequestHeader("Authorization", "Bearer " +  $window.sessionStorage.token);
+//       }
+//
+//     },
+//     error : function() {
+//       // error handler
+//     },
+//     success: function(data) {
+//         // success handler
+//     }
+// });
+// }
+
+$("#jwt").click(function(){
+  const user = {usuario: document.getElementById('uname').value, contraseña: document.getElementById('psw').value};
+  console.log(user);
+  $.ajax({
+    url: "./login",
+    data: user,
+    type: "post",
+    success: function(response, textStatus, xhr){
+      console.log(response.token);
+      sessionStorage.setItem('token', response.token);
+      console.log(sessionStorage.getItem('token'));
+      window.location.href = "/";
+    },
+    error: function(XMLHttpRequest, textStatus, error){
+      alert("AJAX error: "  + error + " usuario o contraseña erronea");
+    }
+  });
+});
+</script>

@@ -1,0 +1,80 @@
+<style>
+body{
+  background-color: #31d2ff;
+}
+h1{
+  text-align: center;
+  font-size: 45px;
+  margin-top: 0px;
+}
+h3, h4 {
+    display: inline-block;
+}
+.column{
+  text-align: center;
+  width: 45%;
+  padding: 0px;
+  margin-top: 50px;
+  margin-left: 25%;
+}
+
+.reporte{
+  text-align: center;
+  margin-top: 5px;
+  border-style: solid;
+  background-color: white;
+  margin-bottom: 10px;
+}
+
+.go-back input[type="submit"]{
+  font-size: 15pt;
+  width: 8%;
+  height: 35px;
+  background-color: #3798ff;
+  color: white;
+  border: 2px solid black;
+  margin-bottom: 0px;
+}
+
+.go-back input[type="submit"]:hover{
+  border: 2px solid red;
+}
+
+.llenarReporte{
+  text-align: center;
+}
+
+
+</style>
+
+<div class="go-back">
+<form action="/">
+    <input type="submit" value="Home" />
+</form>
+</div>
+
+<h1>Reportes</h1>
+
+<div class="llenarReporte">
+  <form action="/report" method="POST" id="report">
+    Titulo: <input type="text" name="titulo"><br>
+    <textarea rows="4" cols="50" name="contenido" form="report"></textarea><br>
+    <input type="submit">
+  </form>
+</div>
+
+
+
+
+
+<div class="column">
+  <h2>Reportes del usuario</h2>
+  {{#each documents}}
+  <div class="reporte">
+    <h3>{{this.titulo}}</h3><br>
+    <h4>{{date this.date}}</h4>
+    <p>{{this.contenido}}</p><br>
+  </div>
+
+  {{/each}}
+</div>

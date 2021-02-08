@@ -1,12 +1,15 @@
 {
-  "name": "local-server",
+  "name": "mongoTest",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "chart.js": "^2.8.0",
     "express": "^4.16.4",
     "express-handlebars": "^3.1.0",
+    "jquery": "^3.4.1",
+    "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.2.4",
     "path": "^0.12.7",
     "tabulator-tables": "^4.2.7"
